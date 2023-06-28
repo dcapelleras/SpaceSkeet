@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject PauseMenu;
 
     //Variables de estado
-    bool gamePaused = false;
+    public bool gamePaused = false;
 
     public bool gameOver = false;
 

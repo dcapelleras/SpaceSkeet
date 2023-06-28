@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+
+[RequireComponent(typeof(LineRenderer))]
 public class Player : MonoBehaviour
 {
     Camera cam;
 
     List<GameObject> marks = new List<GameObject>(); //can be special explosion effect
     [SerializeField] GameObject shootMark;
+    //[SerializeField] Animator armAnimator;
 
     [SerializeField] float shootCooldown = 0.3f;
     float canShoot = 0;
@@ -22,16 +25,22 @@ public class Player : MonoBehaviour
 
     [SerializeField] TMP_Text cargador;
 
+    LineRenderer lineRenderer;
+    [SerializeField] Material rayMaterial;
+
     private void Awake()
     {
         cam = Camera.main;
+        lineRenderer = GetComponent<LineRenderer>();
+        lineRenderer.positionCount = 2;
+        lineRenderer.material= rayMaterial;
         for (int i = 0; i < 20; i++)
         {
             GameObject newMark = Instantiate(shootMark);
-            newMark.transform.SetParent(transform);
+            //newMark.transform.SetParent(transform);
             newMark.SetActive(false);
             marks.Add(newMark);
-            cargador.text = currentAmmo.ToString();
+            cargador.text = "Ammo: " + currentAmmo.ToString();
         }
     }
 
@@ -41,10 +50,26 @@ public class Player : MonoBehaviour
         {
             Shoot();
         }
+        UpdateRotation();
+    }
+
+    void UpdateRotation()
+    {
+        RaycastHit hitRotation;
+        if (Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out hitRotation))
+        {
+            Vector3 dir = hitRotation.point - transform.position;
+            Quaternion rot = Quaternion.LookRotation(dir);
+            transform.rotation = rot;
+        }
     }
 
     void Shoot()
     {
+        if (GameManager.instance.gamePaused)
+        {
+            return;
+        }
         if (Time.time > canShoot)
         {
             if (Input.GetMouseButtonDown(0))
@@ -54,9 +79,13 @@ public class Player : MonoBehaviour
                     StartCoroutine(ReloadWeapon());
                     return;
                 }
+                //armAnimator.SetTrigger("Shoot");
                 RaycastHit hit;
                 if (Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out hit))
                 {
+                    Vector3[] rayPositions = new Vector3[2] {new Vector3(0,0,0), hit.point};
+                    lineRenderer.SetPositions(rayPositions);
+                    StartCoroutine(ShowRayShot());
                     if (hit.transform.TryGetComponent(out Enemy enemy))
                     {
                         GameObject mark = GetMark();
@@ -68,18 +97,25 @@ public class Player : MonoBehaviour
                 }
                 canShoot = Time.time + shootCooldown;
                 currentAmmo--;
-                cargador.text = currentAmmo.ToString();
+                cargador.text = "Ammo: " + currentAmmo.ToString();
             }
         }
+    }
+
+    IEnumerator ShowRayShot()
+    {
+        yield return new WaitForSeconds(shootCooldown);
+        Vector3[] rayPositions = new Vector3[2] { new Vector3(0, 0, 0), new Vector3(0, 0, 0) };
+        lineRenderer.SetPositions(rayPositions);
     }
 
     IEnumerator ReloadWeapon()
     {
         reloading = true;
-        //play reload animation
+        //armAnimator.SetTrigger("Reload");
         yield return new WaitForSeconds(reloadTime);
         currentAmmo = maxAmmo;
-        cargador.text = currentAmmo.ToString();
+        cargador.text = "Ammo: " + currentAmmo.ToString();
         reloading = false;
     }
 
