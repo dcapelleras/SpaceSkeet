@@ -27,13 +27,14 @@ public class Player : MonoBehaviour
 
     LineRenderer lineRenderer;
     [SerializeField] Material rayMaterial;
+    [SerializeField] Material transpMaterial;
 
     private void Awake()
     {
         cam = Camera.main;
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.positionCount = 2;
-        lineRenderer.material= rayMaterial;
+        lineRenderer.material= transpMaterial;
         for (int i = 0; i < 20; i++)
         {
             GameObject newMark = Instantiate(shootMark);
@@ -85,6 +86,7 @@ public class Player : MonoBehaviour
                 {
                     Vector3[] rayPositions = new Vector3[2] {new Vector3(0,0,0), hit.point};
                     lineRenderer.SetPositions(rayPositions);
+                    lineRenderer.material = rayMaterial;
                     StartCoroutine(ShowRayShot());
                     if (hit.transform.TryGetComponent(out Enemy enemy))
                     {
@@ -107,6 +109,7 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(shootCooldown);
         Vector3[] rayPositions = new Vector3[2] { new Vector3(0, 0, 0), new Vector3(0, 0, 0) };
         lineRenderer.SetPositions(rayPositions);
+        lineRenderer.material = transpMaterial;
     }
 
     IEnumerator ReloadWeapon()

@@ -17,6 +17,8 @@ public class Enemy : MonoBehaviour
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.positionCount = 2;
         lineRenderer.material = rayMaterial;
+        Vector3[] rayPositions = new Vector3[2] { new Vector3(0, 0,-20), new Vector3(0, 0, -20) };
+        lineRenderer.SetPositions(rayPositions);
         rb = GetComponent<Rigidbody>();
         playerTransform = FindObjectOfType<Player>().GetComponent<Transform>();
     }
@@ -50,7 +52,7 @@ public class Enemy : MonoBehaviour
     IEnumerator ShowRayShot()
     {
         yield return new WaitForSeconds(0.2f);
-        Vector3[] rayPositions = new Vector3[2] { new Vector3(0, 0, 0), new Vector3(0, 0, 0) };
+        Vector3[] rayPositions = new Vector3[2] { new Vector3(0, 0, -20), new Vector3(0, 0, -20) };
         lineRenderer.SetPositions(rayPositions);
     }
 
